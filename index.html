@@ -68,7 +68,7 @@
 <body>
   <div class="container">
     <h1>Registro de Chamada</h1>
-    <form id="chamadaForm">
+    <form id="chamadaForm" target="_blank">
       <label for="matricula1">Número de Matrícula:</label>
       <input type="text" id="matricula1" name="entry.2045947068" required placeholder="Ex: 202312345" maxlength="9" inputmode="numeric">
 
@@ -132,21 +132,14 @@
           document.getElementById('mes').value = now.getMonth() + 1;
           document.getElementById('dia').value = now.getDate();
 
-          const actionURL = 'https://docs.google.com/forms/d/e/1FAIpQLSdITrSnWyGLyU_pkemYNpo-64ysLaSFnwcpXORhRXrsEWmIzQ/formResponse';
+          form.action = 'https://docs.google.com/forms/d/e/1FAIpQLSdITrSnWyGLyU_pkemYNpo-64ysLaSFnwcpXORhRXrsEWmIzQ/formResponse';
+          form.method = 'POST';
+          form.submit();
 
-          fetch(actionURL, {
-            method: 'POST',
-            mode: 'no-cors',
-            body: new FormData(form)
-          }).then(() => {
-            localStorage.setItem(`presenca_${visitorId}`, 'true');
-            alert('Presença registrada com sucesso!');
-            form.reset();
-            form.style.display = 'none';
-            alreadySentMsg.style.display = 'block';
-          }).catch(() => {
-            alert('Erro ao registrar presença. Tente novamente mais tarde.');
-          });
+          localStorage.setItem(`presenca_${visitorId}`, 'true');
+          form.reset();
+          form.style.display = 'none';
+          alreadySentMsg.style.display = 'block';
         });
       });
     });
