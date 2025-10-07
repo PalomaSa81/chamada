@@ -71,7 +71,6 @@
             margin-top: 10px;
         }
     </style>
-    <script src="https://openfpcdn.io/fingerprintjs/v3"></script>
 </head>
 <body>
     <div class="container">
@@ -88,8 +87,6 @@
             <label for="codigoAula">Código da Aula:</label>
             <input type="text" id="codigoAula" name="codigo_aula" required>
             
-            <input type="hidden" name="fingerprint" id="fingerprint">
-            
             <button type="submit">Enviar Presença</button>
             <div class="error-message" id="errorMsg"></div>
         </form>
@@ -105,13 +102,6 @@
         const submitButton = form.querySelector('button[type="submit"]');
         const successMsg = document.getElementById('successMsg');
         const errorMsg = document.getElementById('errorMsg');
-
-        // Inicializa o Fingerprint
-        FingerprintJS.load().then(fp => {
-            fp.get().then(result => {
-                document.getElementById('fingerprint').value = result.visitorId;
-            });
-        });
 
         // ----------------------------------------------------
         // 1. FUNÇÃO PARA OBTER GEOLOCALIZAÇÃO
@@ -184,7 +174,7 @@
                     matricula: m1,
                     codigo_aula: document.getElementById('codigoAula').value.trim(),
                     timestamp: timestampCompleto,
-                    fingerprint: document.getElementById('fingerprint').value,
+                    // fingerprint foi removido
                     latitude: localizacao.latitude,
                     longitude: localizacao.longitude,
                     erro_localizacao: localizacao.erro // Campo de debug
@@ -201,13 +191,10 @@
                 
                 // 5. Processa a resposta
                 if (response.ok) {
-                    // O Apps Script retorna um status 200/OK se o envio deu certo
                     successMsg.style.display = 'block';
                     form.reset();
-                    // Opcional: Salvar no localStorage para evitar duplicidade na mesma máquina
-                    localStorage.setItem(`presenca_${dadosEnvio.fingerprint}`, timestampCompleto);
+                    // Removido localStorage do fingerprint
                 } else {
-                    // Trata erro de servidor
                     throw new Error('Erro na resposta do servidor. Código: ' + response.status);
                 }
 
