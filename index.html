@@ -1,121 +1,225 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>Registro de Chamada</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      background: #f0f4f8;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
-    .container {
-      background: white;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      width: 100%;
-      max-width: 400px;
-    }
-    label {
-      display: block;
-      margin-top: 15px;
-    }
-    input {
-      width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-    button {
-      margin-top: 20px;
-      width: 100%;
-      padding: 10px;
-      background-color: #0077cc;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #005fa3;
-    }
-    .message {
-      text-align: center;
-      color: green;
-      margin-top: 20px;
-      display: none;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>Registro de Chamada</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: sans-serif;
+            background: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            margin-top: 20px;
+            width: 100%;
+            padding: 10px;
+            background-color: #0077cc;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover:not(:disabled) {
+            background-color: #005fa3;
+        }
+        button:disabled {
+            background-color: #999;
+            cursor: not-allowed;
+        }
+        .message {
+            text-align: center;
+            color: green;
+            margin-top: 20px;
+            display: none;
+            padding: 10px;
+            border: 1px solid #d4edda;
+            background-color: #f0fff4;
+            border-radius: 5px;
+        }
+        .error-message {
+            color: red;
+            background-color: #fff0f0;
+            border: 1px solid #f5c6cb;
+            display: none;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+    </style>
+    <script src="https://openfpcdn.io/fingerprintjs/v3"></script>
 </head>
 <body>
-  <div class="container">
-    <h2>Registro de Chamada</h2>
-    <form id="chamadaForm" action="https://docs.google.com/forms/d/e/1FAIpQLSdITrSnWyGLyU_pkemYNpo-64ysLaSFnwcpXORhRXrsEWmIzQ/formResponse" method="POST" target="hidden_iframe" onsubmit="return validarFormulario();">
-      <label for="matricula1">Matrícula:</label>
-      <input type="text" id="matricula1" name="entry.2045947068" required maxlength="9" inputmode="numeric">
+    <div class="container">
+        <h2>Registro de Chamada</h2>
+        
+        <form id="chamadaForm" onsubmit="validarFormulario(event);">
+            
+            <label for="matricula1">Matrícula (9 dígitos):</label>
+            <input type="text" id="matricula1" name="matricula" required maxlength="9" inputmode="numeric">
 
-      <label for="matricula2">Confirme a Matrícula:</label>
-      <input type="text" id="matricula2" name="entry.1394548608" required maxlength="9" inputmode="numeric">
+            <label for="matricula2">Confirme a Matrícula:</label>
+            <input type="text" id="matricula2" required maxlength="9" inputmode="numeric">
 
-      <label for="codigoAula">Código da Aula:</label>
-      <input type="text" id="codigoAula" name="entry.1668398532" required>
+            <label for="codigoAula">Código da Aula:</label>
+            <input type="text" id="codigoAula" name="codigo_aula" required>
+            
+            <input type="hidden" name="fingerprint" id="fingerprint">
+            
+            <button type="submit">Enviar Presença</button>
+            <div class="error-message" id="errorMsg"></div>
+        </form>
+        
+        <div class="message" id="successMsg">Presença registrada com sucesso! Aguarde a confirmação da geolocalização.</div>
+    </div>
 
-      <input type="hidden" name="entry.1989014400_year" id="ano">
-      <input type="hidden" name="entry.1989014400_month" id="mes">
-      <input type="hidden" name="entry.1989014400_day" id="dia">
-      <input type="hidden" name="entry.2048343992" value="Opção 1">
-      <input type="hidden" name="fingerprint" id="fingerprint">
+    <script>
+        // 🚨 PASSO CRUCIAL: MUDAR ESTA URL PARA A SUA URL DO GOOGLE APPS SCRIPT
+        const APPS_SCRIPT_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxI62Qb45cVl1gv5uuE9DCsLLvx-c17QQ3sK8XmCxO9ZrGLhxEr7fq2Qf7qL3tz-nU6/exec'; 
 
-      <button type="submit">Enviar</button>
-    </form>
-    <div class="message" id="successMsg">Presença registrada com sucesso!</div>
-  </div>
+        const form = document.getElementById('chamadaForm');
+        const submitButton = form.querySelector('button[type="submit"]');
+        const successMsg = document.getElementById('successMsg');
+        const errorMsg = document.getElementById('errorMsg');
 
-  <iframe name="hidden_iframe" style="display:none;" onload="mostrarMensagem();"></iframe>
+        // Inicializa o Fingerprint
+        FingerprintJS.load().then(fp => {
+            fp.get().then(result => {
+                document.getElementById('fingerprint').value = result.visitorId;
+            });
+        });
 
-  <script src="https://openfpcdn.io/fingerprintjs/v3"></script>
-  <script>
-    FingerprintJS.load().then(fp => {
-      fp.get().then(result => {
-        document.getElementById('fingerprint').value = result.visitorId;
-      });
-    });
+        // ----------------------------------------------------
+        // 1. FUNÇÃO PARA OBTER GEOLOCALIZAÇÃO
+        // ----------------------------------------------------
+        function getLocalizacao() {
+            return new Promise((resolve) => {
+                if (!navigator.geolocation) {
+                    resolve({ latitude: 'N/A', longitude: 'N/A', erro: 'Geolocalização não suportada.' });
+                    return;
+                }
 
-    function validarFormulario() {
-      const m1 = document.getElementById('matricula1').value.trim();
-      const m2 = document.getElementById('matricula2').value.trim();
-      const regex = /^\d{9}$/;
+                // Tenta obter a posição
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        resolve({
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude,
+                            erro: ''
+                        });
+                    },
+                    (error) => {
+                        // Trata negação de permissão ou erro
+                        resolve({
+                            latitude: 'NEGADA',
+                            longitude: 'NEGADA',
+                            erro: `Erro ${error.code}: ${error.message}`
+                        });
+                    },
+                    { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+                );
+            });
+        }
 
-      if (!regex.test(m1) || !regex.test(m2)) {
-        alert('A matrícula deve conter exatamente 9 dígitos.');
-        return false;
-      }
+        // ----------------------------------------------------
+        // 2. FUNÇÃO PRINCIPAL DE VALIDAÇÃO E ENVIO (CHAMADA PELO onsubmit)
+        // ----------------------------------------------------
+        async function validarFormulario(event) {
+            event.preventDefault(); // Impede o envio padrão (evitando o erro GET!)
 
-      if (m1 !== m2) {
-        alert('As matrículas não coincidem.');
-        return false;
-      }
+            // Oculta mensagens antigas
+            successMsg.style.display = 'none';
+            errorMsg.style.display = 'none';
 
-      const now = new Date();
-      document.getElementById('ano').value = now.getFullYear();
-      document.getElementById('mes').value = now.getMonth() + 1;
-      document.getElementById('dia').value = now.getDate();
+            // 1. Validação de campos
+            const m1 = document.getElementById('matricula1').value.trim();
+            const m2 = document.getElementById('matricula2').value.trim();
+            const regex = /^\d{9}$/;
 
-      localStorage.setItem(`presenca_${document.getElementById('fingerprint').value}`, 'true');
-      return true;
-    }
+            if (!regex.test(m1) || !regex.test(m2)) {
+                alert('A matrícula deve conter exatamente 9 dígitos.');
+                return;
+            }
+            if (m1 !== m2) {
+                alert('As matrículas não coincidem.');
+                return;
+            }
 
-    function mostrarMensagem() {
-      const msg = document.getElementById('successMsg');
-      msg.style.display = 'block';
-      document.getElementById('chamadaForm').reset();
-    }
-  </script>
+            // Bloqueia o botão durante o processamento
+            submitButton.disabled = true;
+            submitButton.textContent = 'Aguarde...';
+
+            try {
+                // 2. Coleta de dados avançados
+                const now = new Date();
+                const localizacao = await getLocalizacao();
+                const timestampCompleto = now.toISOString();
+
+                // 3. Monta o objeto JSON (nomes de campos IGUAIS aos cabeçalhos da sua planilha)
+                const dadosEnvio = {
+                    matricula: m1,
+                    codigo_aula: document.getElementById('codigoAula').value.trim(),
+                    timestamp: timestampCompleto,
+                    fingerprint: document.getElementById('fingerprint').value,
+                    latitude: localizacao.latitude,
+                    longitude: localizacao.longitude,
+                    erro_localizacao: localizacao.erro // Campo de debug
+                };
+                
+                // 4. Envio POST para o Apps Script
+                const response = await fetch(APPS_SCRIPT_ENDPOINT, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(dadosEnvio)
+                });
+                
+                // 5. Processa a resposta
+                if (response.ok) {
+                    // O Apps Script retorna um status 200/OK se o envio deu certo
+                    successMsg.style.display = 'block';
+                    form.reset();
+                    // Opcional: Salvar no localStorage para evitar duplicidade na mesma máquina
+                    localStorage.setItem(`presenca_${dadosEnvio.fingerprint}`, timestampCompleto);
+                } else {
+                    // Trata erro de servidor
+                    throw new Error('Erro na resposta do servidor. Código: ' + response.status);
+                }
+
+            } catch (error) {
+                console.error('Erro durante o envio:', error);
+                errorMsg.textContent = 'Erro ao registrar a presença. Verifique o console ou tente novamente.';
+                errorMsg.style.display = 'block';
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = 'Enviar Presença';
+            }
+        }
+    </script>
 </body>
 </html>
